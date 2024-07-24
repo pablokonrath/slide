@@ -5,7 +5,7 @@ export default class Slide {
     this.dist = {
       finalPosition: 0,
       startX: 0,
-      movemet: 0,
+      movement: 0,
     };
   }
 
@@ -15,8 +15,8 @@ export default class Slide {
   }
 
   updatePosition(clientX) {
-    this.dist.movemet = this.dist.startX - clientX;
-    return (this.dist.finalPosition - this.dist.movemet) * 1.5;
+    this.dist.movement = (this.dist.startX - clientX) * 1.5;
+    return this.dist.finalPosition - this.dist.movement;
   }
 
   onStart(event) {
@@ -56,9 +56,45 @@ export default class Slide {
     this.onMove = this.onMove.bind(this);
     this.onEnd = this.onEnd.bind(this);
   }
+
+  //slide config
+
+  slidePosition(slide) {
+    const margin = (this.wrapper.offsetWidth - slide.offsetWidth) / 2;
+    return -(slide.offsetLeft - margin);
+  }
+
+  slidesConfig() {
+    //desestrutura os filhos de slide
+    this.slideArray = [...this.slide.children].map((slide) => {
+      const position = this.slidePosition(slide);
+      return {
+        position,
+        slide,
+      };
+    });
+  }
+
+  slidesIndexNav(index) {
+    const last = this.slideArray.length - 1;
+    this.index = {
+      prev: index ? index - 1 : undefined,
+      active: index,
+      next: index === last ? undefined : index + 1,
+    };
+  }
+
+  changeSlide(index) {
+    const activeSlide = this.slideArray[index];
+    this.moveSlide(activeSlide.position);
+    this.slidesIndexNav(index);
+    this.dist.finalPosition = activeSlide.position;
+  }
+
   init() {
     this.bindEvents();
     this.addSlideEvents();
+    this.slidesConfig();
     return this;
   }
 }
